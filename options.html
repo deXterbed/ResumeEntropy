@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Job Assistant Settings</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        textarea {
+            min-height: 200px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Settings</h1>
+
+    <div class="section">
+        <label for="provider">AI Provider</label>
+        <select id="provider">
+            <option value="openai">OpenAI</option>
+            <option value="gemini">Google Gemini</option>
+            <option value="ollama">Ollama (Local)</option>
+        </select>
+    </div>
+
+    <div class="section" id="apiKeySection">
+        <label for="apiKey">API Key</label>
+        <input type="password" id="apiKey" placeholder="sk-...">
+        <p style="font-size: 12px; color: #666;">Required for OpenAI and Gemini.</p>
+    </div>
+
+    <div class="section hidden" id="ollamaSection">
+        <label for="ollamaModel">Ollama Model</label>
+        <input type="text" id="ollamaModel" placeholder="gemma3:27b" value="gemma3:27b">
+
+        <label for="ollamaUrl" style="margin-top: 12px;">Ollama URL</label>
+        <input type="text" id="ollamaUrl" placeholder="http://localhost:11434" value="http://localhost:11434">
+    </div>
+
+    <div class="section">
+        <label for="userResume">Your Resume / Professional Bio</label>
+        <textarea id="userResume" placeholder="Paste your full resume text here..."></textarea>
+    </div>
+
+    <button id="saveBtn">Save Settings</button>
+    <span id="status" style="margin-left: 10px; color: var(--success-color);"></span>
+
+    <script src="options.js"></script>
+</body>
+
+</html>

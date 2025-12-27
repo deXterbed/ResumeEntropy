@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>High Entropy</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            padding: 16px;
+        }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .tab-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary-color);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .result-area {
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 6px;
+            min-height: 200px;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h2 style="margin: 0;">Resume Entropy</h2>
+        <button id="settingsBtn"
+            style="padding: 4px 8px; font-size: 12px; background: transparent; color: var(--text-color); border: 1px solid var(--border-color);">⚙️
+            Settings</button>
+    </div>
+
+    <div id="setupWarning" class="hidden" style="color: var(--error-color); margin-bottom: 16px;">
+        Please configure your API Key and Resume in <a href="#" id="openOptions">Settings</a> first.
+    </div>
+
+    <div class="card">
+        <h3>Generate</h3>
+        <div class="checkbox-group">
+            <label><input type="checkbox" id="genResume" checked> Tailored Resume (ATS)</label>
+            <label><input type="checkbox" id="genCoverLetter" checked> Cover Letter</label>
+            <label><input type="checkbox" id="genEmail"> Outreach Email</label>
+        </div>
+        <button id="generateBtn" style="width: 100%">Generate Documents</button>
+    </div>
+
+    <div id="results" class="hidden">
+        <div class="tab-container" id="tabs">
+            <!-- Tabs will be injected here -->
+        </div>
+        <div id="contentArea" class="result-area"></div>
+        <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+            <button id="copyBtn">Copy</button>
+            <button id="pdfBtn" style="background-color: #ef4444;">PDF</button>
+            <button id="docxBtn" style="background-color: #2563eb;">DOCX</button>
+        </div>
+    </div>
+
+    <script src="libs/jspdf.min.js"></script>
+    <script src="utils.js"></script>
+    <script src="sidepanel.js"></script>
+</body>
+
+</html>
