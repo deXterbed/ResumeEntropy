@@ -1,12 +1,19 @@
 // Utils for AI generation
 
-async function generateWithAI(type, jobDescription, userResume, provider, config) {
-    const systemPrompt = "You are an expert career coach and professional resume writer. You help candidates tailor their applications to specific job descriptions to maximize their chances of getting hired.";
+async function generateWithAI(
+  type,
+  jobDescription,
+  userResume,
+  provider,
+  config
+) {
+  const systemPrompt =
+    "You are an expert career coach and professional resume writer. You help candidates tailor their applications to specific job descriptions to maximize their chances of getting hired.";
 
-    let userPrompt = "";
+  let userPrompt = "";
 
-    if (type === 'resume') {
-        userPrompt = `
+  if (type === "resume") {
+    userPrompt = `
       TASK: Rewrite the candidate's resume to target the specific job description below.
       
       GUIDELINES:
@@ -21,8 +28,8 @@ async function generateWithAI(type, jobDescription, userResume, provider, config
       JOB DESCRIPTION:
       ${jobDescription}
     `;
-    } else if (type === 'cover-letter') {
-        userPrompt = `
+  } else if (type === "cover-letter") {
+    userPrompt = `
       TASK: Write a compelling cover letter for this job application.
       
       GUIDELINES:
@@ -37,8 +44,8 @@ async function generateWithAI(type, jobDescription, userResume, provider, config
       JOB DESCRIPTION:
       ${jobDescription}
     `;
-    } else if (type === 'email') {
-        userPrompt = `
+  } else if (type === "email") {
+    userPrompt = `
       TASK: Write a short, punchy outreach email to a recruiter or hiring manager.
       
       GUIDELINES:
@@ -54,100 +61,137 @@ async function generateWithAI(type, jobDescription, userResume, provider, config
       JOB DESCRIPTION:
       ${jobDescription}
     `;
-    }
+  }
 
-    // Dispatch to appropriate provider
-    if (provider === 'ollama') {
-        return await callOllamaAPI(systemPrompt, userPrompt, config);
-    } else if (provider === 'gemini') {
-        return await callGeminiAPI(systemPrompt, userPrompt, config);
-    } else {
-        return await callOpenAIAPI(systemPrompt, userPrompt, config);
-    }
+  // Dispatch to appropriate provider
+  if (provider === "lmstudio") {
+    return await callLMStudioAPI(systemPrompt, userPrompt, config);
+  } else if (provider === "gemini") {
+    return await callGeminiAPI(systemPrompt, userPrompt, config);
+  } else {
+    return await callOpenAIAPI(systemPrompt, userPrompt, config);
+  }
 }
 
 async function callOpenAIAPI(systemPrompt, userPrompt, config) {
-    try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${config.apiKey}`
-            },
-            body: JSON.stringify({
-                model: "gpt-4o",
-                messages: [
-                    { role: "system", content: systemPrompt },
-                    { role: "user", content: userPrompt }
-                ],
-                temperature: 0.7
-            })
-        });
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${config.apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        temperature: 0.7,
+      }),
+    });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || 'OpenAI API Error');
-        }
-
-        const data = await response.json();
-        return data.choices[0].message.content;
-    } catch (error) {
-        console.error('OpenAI Error:', error);
-        throw error;
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error?.message || "OpenAI API Error");
     }
+
+    const data = await response.json();
+    return data.choices[0].message.content;
+  } catch (error) {
+    console.error("OpenAI Error:", error);
+    throw error;
+  }
 }
 
 async function callGeminiAPI(systemPrompt, userPrompt, config) {
-    try {
-        // Using gemini-2.0-flash as confirmed available by user logs
-        const model = 'gemini-2.0-flash';
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${config.apiKey}`;
+  try {
+    // Using gemini-2.0-flash as confirmed available by user logs
+    const model = "gemini-2.0-flash";
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${config.apiKey}`;
 
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{ text: systemPrompt + "\n\n" + userPrompt }]
-                }]
-            })
-        });
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [{ text: systemPrompt + "\n\n" + userPrompt }],
+          },
+        ],
+      }),
+    });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || 'Gemini API Error');
-        }
-
-        const data = await response.json();
-        return data.candidates[0].content.parts[0].text;
-    } catch (error) {
-        console.error('Gemini Error:', error);
-        throw error;
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error?.message || "Gemini API Error");
     }
+
+    const data = await response.json();
+    return data.candidates[0].content.parts[0].text;
+  } catch (error) {
+    console.error("Gemini Error:", error);
+    throw error;
+  }
 }
 
-async function callOllamaAPI(systemPrompt, userPrompt, config) {
-    try {
-        const response = await fetch(`${config.ollamaUrl}/api/generate`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model: config.ollamaModel,
-                prompt: systemPrompt + "\n\n" + userPrompt,
-                stream: false
-            })
-        });
-
-        if (!response.ok) {
-            console.error('Ollama Error Status:', response.status, response.statusText);
-            const errText = await response.text();
-            throw new Error(`Ollama API Error: ${response.status} ${response.statusText} - ${errText}`);
-        }
-
-        const data = await response.json();
-        return data.response;
-    } catch (error) {
-        console.error('Ollama Error:', error);
-        throw new Error('Failed to connect to Ollama. Is it running?');
+async function callLMStudioAPI(systemPrompt, userPrompt, config) {
+  try {
+    // Build headers - only include Authorization if API key is provided (optional for local LLM)
+    const headers = { "Content-Type": "application/json" };
+    if (config.apiKey && config.apiKey.trim()) {
+      headers["Authorization"] = `Bearer ${config.apiKey}`;
     }
+
+    const response = await fetch(`${config.lmstudioUrl}/v1/chat/completions`, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify({
+        model: config.lmstudioModel,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        temperature: 0.7,
+        stream: false,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(
+        "LM Studio Error Status:",
+        response.status,
+        response.statusText
+      );
+      let errText = "";
+      try {
+        errText = await response.text();
+      } catch (parseError) {
+        // If we can't parse the error, continue with empty errText
+      }
+
+      // Check if it's an API key error
+      if (errText.includes("API key") || errText.includes("api-keys")) {
+        throw new Error(
+          "LM Studio is configured to require an API key. Please disable API key requirement in LM Studio settings, or configure LM Studio to allow requests without authentication."
+        );
+      }
+
+      throw new Error(
+        `LM Studio API Error: ${response.status} ${response.statusText}${
+          errText ? " - " + errText : ""
+        }`
+      );
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content;
+  } catch (error) {
+    console.error("LM Studio Error:", error);
+    // If it's already a formatted error, re-throw it
+    if (error.message && error.message.includes("LM Studio")) {
+      throw error;
+    }
+    throw new Error("Failed to connect to LM Studio. Is it running?");
+  }
 }
